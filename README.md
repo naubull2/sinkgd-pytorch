@@ -1,14 +1,16 @@
 # SinkGD: A PyTorch Implementation
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 SinkGD is a novel, stateless optimizer designed to significantly reduce the memory footprint of training Large Language Models (LLMs) while achieving exceptional performance.
 
 This repository contains a PyTorch implementation of the **Sinkhorn Gradient Descent (SinkGD)** optimizer, as introduced in the paper:
 
 
 > **Gradient Multi-Normalization for Stateless and Scalable LLM Training**
-_Meyer Scetbon, Chao Ma, Wenbo Gong, Edward Meeds_
-[arXiv:2502.06742](https://arxiv.org/pdf/2502.06742)
+>  _Meyer Scetbon, Chao Ma, Wenbo Gong, Edward Meeds_
+>
+> [arXiv:2502.06742](https://arxiv.org/pdf/2502.06742)
 
 
 
@@ -51,7 +53,7 @@ While the raw step time is similar to Adam, the **effective throughput** (which 
 ## Installation
 
 ```bash
-pip install sinkgd
+pip install sinkgd-pytorch
 ```
 
 ## Quick Start
