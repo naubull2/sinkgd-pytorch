@@ -86,7 +86,6 @@ trainer = Trainer(
 However if you want to strictly reproduce as the paper suggests, here is an example of how to set up such parameter groups:
 
 ```python
-import torch.nn as nn
 from torch.optim import Adam
 from sinkgd_optimizer import SinkGD
 from transformers import AutoModelForCausalLM
@@ -100,7 +99,7 @@ adam_params = []
 for name, param in model.named_parameters():
     if param.requires_grad:
         # Apply SinkGD to 2D weight matrices of Linear layers
-        if param.dim() == 2 and isinstance(model.get_submodule(name.rsplit('.', 1)[0]), nn.Linear):
+        if param.dim() == 2:
             sinkgd_params.append(param)
         # Apply Adam to all other parameters (biases, embeddings, layer norms)
         else:
