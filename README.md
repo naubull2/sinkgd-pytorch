@@ -106,25 +106,17 @@ for name, param in model.named_parameters():
             adam_params.append(param)
 
 # 2. Initialize the optimizers for each group
-# The paper uses a smaller, scaled learning rate for SinkGD layers
-global_lr = 2e-2
-sinkgd_scaling = 0.05
-
-optimizer_groups = [
-    {'params': adam_params, 'lr': global_lr},
-    {'params': sinkgd_params, 'lr': global_lr * sinkgd_scaling}
-]
-
 # Note: The paper uses Adam for the non-SinkGD parameters.
-# You can initialize Adam with the combined groups.
 # The SinkGD logic will be handled internally based on the parameter groups.
-# For a pure implementation, you might pass the SinkGD-specific parameters
-# to your SinkGD class and the Adam parameters to torch.optim.Adam.
-
 # The paper uses L=5 iterations for the Sinkhorn procedure
-optimizer_sinkgd = SinkGD(sinkgd_params, lr=global_lr * sinkgd_scaling, sinkhorn_iterations=5)
-optimizer_adam = Adam(adam_params, lr=global_lr)
 
+lr = 1e-4
+optimizer_groups = [
+    {'params': adam_params, 'lr': lr},
+    {'params': sinkgd_params, 'lr': lr}
+]
+optimizer_sinkgd = SinkGD(sinkgd_params, lr=lr, sinkhorn_iterations=5)
+optimizer_adam = Adam(adam_params, lr=lr)
 
 # --- In your training loop ---
 # optimizer.zero_grad() becomes:
