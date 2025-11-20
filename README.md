@@ -60,20 +60,20 @@ pip install sinkgd-pytorch
 
 Using SinkGD is straightforward. The paper's authors achieved the best results by applying SinkGD **only to the 2D weight matrices** and using Adam for all other parameters (like embeddings and lyaer norms).
 
-This implementation has simple branching logic inside that only apply SinkGD to 2-dim gradients and all other cases apply normalization only. So even by simply applying this optimizer alone can still work and it showed results on par with the authors' reported results.
-
-Simple application with a single SinkGD optimizer:
 ```python
 from sinkgd_optimizer import SinkGD
 
 # ...
 
 # --- Initialize optimizer ---
-sinkgd_scaling = 0.05
-global_lr = 2e-2
-learning_rate = sinkgd_scaling * global_lr
+scaling_alpha = 0.1
+global_lr = 1e-3
+learning_rate = scaling_alpha * global_lr
 
-optimizer = SinkGD(model.parameters(), lr=learning_rate, sinkhorn_iterations=5)
+optimizer = SinkGD(model.parameters(),
+                   lr=global_lr,
+                   sinkhorn_iter=5,
+                   linear_lr_scale=scaling_alpha)
 
 trainer = Trainer(
 	model=model,
@@ -81,53 +81,6 @@ trainer = Trainer(
 	# ...
 )
 # ...
-```
-
-However if you want to strictly reproduce as the paper suggests, here is an example of how to set up such parameter groups:
-
-```python
-from torch.optim import Adam
-from sinkgd_optimizer import SinkGD
-from transformers import AutoModelForCausalLM
-
-model = AutoModelForCausalLM.from_pretrained("gpt2")
-
-# 1. Create parameter groups
-sinkgd_params = []
-adam_params = []
-
-for name, param in model.named_parameters():
-    if param.requires_grad:
-        # Apply SinkGD to 2D weight matrices of Linear layers
-        if param.dim() == 2:
-            sinkgd_params.append(param)
-        # Apply Adam to all other parameters (biases, embeddings, layer norms)
-        else:
-            adam_params.append(param)
-
-# 2. Initialize the optimizers for each group
-# Note: The paper uses Adam for the non-SinkGD parameters.
-# The SinkGD logic will be handled internally based on the parameter groups.
-# The paper uses L=5 iterations for the Sinkhorn procedure
-
-lr = 1e-4
-optimizer_groups = [
-    {'params': adam_params, 'lr': lr},
-    {'params': sinkgd_params, 'lr': lr}
-]
-optimizer_sinkgd = SinkGD(sinkgd_params, lr=lr, sinkhorn_iterations=5)
-optimizer_adam = Adam(adam_params, lr=lr)
-
-# --- In your training loop ---
-# optimizer.zero_grad() becomes:
-optimizer_adam.zero_grad()
-optimizer_sinkgd.zero_grad()
-
-# loss.backward() ...
-
-# optimizer.step() becomes:
-optimizer_adam.step()
-optimizer_sinkgd.step()
 ```
 
 
